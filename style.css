@@ -1,0 +1,61 @@
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0a0a0b;--bg2:#111114;--bg3:#18181c;
+  --border:rgba(255,255,255,.08);--border2:rgba(255,255,255,.16);
+  --text:#f4f4f5;--dim:#a1a1aa;--dimmer:#52525b;
+  --accent:#10b981;--wrong:#ef4444;
+  --light:#f0d9b5;--dark:#b58863;
+  --highlight:rgba(255,255,0,.4);--last:rgba(155,199,0,.41);
+  --check:#ff5555;
+}
+html,body{background:var(--bg);color:var(--text);font-family:-apple-system,'Inter',sans-serif;height:100vh;overflow:hidden;-webkit-font-smoothing:antialiased}
+body{display:flex;flex-direction:column}
+header{display:flex;align-items:center;gap:16px;padding:14px 24px;border-bottom:1px solid var(--border);background:rgba(10,10,11,.6);backdrop-filter:blur(12px)}
+.brand{font-size:16px}
+.spacer{flex:1}
+.stat{background:var(--bg2);border:1px solid var(--border);padding:6px 12px;border-radius:8px;font-size:12px;color:var(--dim);font-family:'SF Mono',monospace}
+.stat span{color:var(--text);font-weight:600}
+
+main{flex:1;display:grid;grid-template-columns:320px 1fr;overflow:hidden}
+.sidebar{background:var(--bg2);border-right:1px solid var(--border);padding:24px;display:flex;flex-direction:column;gap:20px;overflow-y:auto}
+.puzzle-info .puzzle-num{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:600;margin-bottom:8px}
+.puzzle-side{font-size:22px;font-weight:700;margin-bottom:4px}
+.puzzle-hint{font-size:13px;color:var(--dim);line-height:1.5}
+
+.moves h3{font-size:11px;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:8px}
+.move-list{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:12px;min-height:80px;font-family:'SF Mono',monospace;font-size:13px;color:var(--dim);display:flex;flex-wrap:wrap;gap:8px 12px}
+.move-list .move{color:var(--text)}
+.move-list .move.correct{color:var(--accent)}
+.move-list .empty{color:var(--dimmer);font-style:italic}
+
+.controls{display:flex;flex-direction:column;gap:8px}
+.btn{background:var(--bg3);border:1px solid var(--border);color:var(--text);padding:10px 16px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:.15s}
+.btn:hover:not(:disabled){border-color:var(--border2)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.primary{background:linear-gradient(180deg,var(--accent),#059669);border-color:transparent}
+.btn.primary:hover:not(:disabled){background:linear-gradient(180deg,#34d399,var(--accent))}
+.btn.ghost{background:transparent}
+
+.feedback{min-height:40px;padding:12px;border-radius:8px;font-size:13px;text-align:center;font-weight:600;transition:.2s}
+.feedback.good{background:rgba(16,185,129,.15);color:var(--accent);border:1px solid rgba(16,185,129,.3)}
+.feedback.bad{background:rgba(239,68,68,.15);color:var(--wrong);border:1px solid rgba(239,68,68,.3)}
+.feedback:empty{display:none}
+
+.board-wrap{display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto}
+.board{display:grid;grid-template-columns:repeat(8,1fr);grid-template-rows:repeat(8,1fr);width:min(80vh,calc(100vw - 400px));height:min(80vh,calc(100vw - 400px));border-radius:6px;overflow:hidden;box-shadow:0 24px 48px -12px rgba(0,0,0,.6);border:2px solid var(--border)}
+.square{position:relative;display:flex;align-items:center;justify-content:center;cursor:pointer;user-select:none;font-size:min(7vh,70px);transition:background .1s}
+.square.light{background:var(--light)}
+.square.dark{background:var(--dark)}
+.square.selected{box-shadow:inset 0 0 0 4px rgba(16,185,129,.6)}
+.square.legal::after{content:"";position:absolute;width:30%;height:30%;border-radius:50%;background:rgba(0,0,0,.2);pointer-events:none}
+.square.legal.capture::after{width:85%;height:85%;background:transparent;border:4px solid rgba(0,0,0,.25);border-radius:50%}
+.square.last{background:var(--last)!important}
+.square.check{background:var(--check)!important}
+.square .piece{line-height:1;filter:drop-shadow(0 2px 2px rgba(0,0,0,.3));pointer-events:none}
+.square .coord{position:absolute;font-size:10px;font-weight:700;opacity:.5;pointer-events:none;font-family:'SF Mono',monospace}
+.square.light .coord{color:var(--dark)}
+.square.dark .coord{color:var(--light)}
+.square .coord.file{bottom:2px;right:4px}
+.square .coord.rank{top:2px;left:4px}
+
+@media(max-width:900px){main{grid-template-columns:1fr}.sidebar{display:none}}
