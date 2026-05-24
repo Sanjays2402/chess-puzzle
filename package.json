@@ -1,0 +1,9 @@
+{
+  "name": "chess-puzzle",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Browser-based chess tactics trainer with a hand-written, perft-verified move generator.",
+  "scripts": {
+    "test": "node tests/perft.js"
+  }
+}

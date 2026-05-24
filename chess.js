@@ -63,7 +63,7 @@ class Chess {
     });
   }
 
-  pieceMoves(r,c){
+  pieceMoves(r,c,opts={}){
     const p = this.board[r][c];
     const moves = [];
     const push = (nr,nc,flags={}) => {
@@ -112,7 +112,10 @@ class Chess {
       case 'q': slide([[-1,-1],[-1,1],[1,-1],[1,1],[-1,0],[1,0],[0,-1],[0,1]]); break;
       case 'k': {
         for(const dr of [-1,0,1]) for(const dc of [-1,0,1]) if(dr||dc) push(r+dr,c+dc);
-        // castling (pseudo-legal; check detection filters)
+        // Castling is a king-only special move; skip it when we are only
+        // enumerating attacks (e.g. from isAttacked) to avoid mutual recursion
+        // and the cost of attack-square checks we don't need.
+        if(opts.skipCastle) break;
         const side = p.color;
         const row = side === 'w' ? 7 : 0;
         if(r===row && c===4 && !this.isAttacked(r,c,this.opp(side))){
@@ -143,7 +146,7 @@ class Chess {
         if(rr+dir === r && (cc-1 === c || cc+1 === c)) return true;
         continue;
       }
-      const moves = this.pieceMoves(rr,cc);
+      const moves = this.pieceMoves(rr,cc,{skipCastle:true});
       if(moves.some(m => m.to[0]===r && m.to[1]===c)) return true;
     }
     return false;
@@ -162,6 +165,7 @@ class Chess {
 
   apply(m){
     const p = this.board[m.from[0]][m.from[1]];
+    const captured = this.board[m.to[0]][m.to[1]];
     this.board[m.from[0]][m.from[1]] = null;
     this.board[m.to[0]][m.to[1]] = m.promotion ? { type: m.promotion, color: p.color } : p;
     if(m.ep){
@@ -173,13 +177,26 @@ class Chess {
       if(m.castle === 'k'){ this.board[row][5] = this.board[row][7]; this.board[row][7] = null; }
       else { this.board[row][3] = this.board[row][0]; this.board[row][0] = null; }
     }
-    // Castling rights
+    // Castling rights: cleared when our king or our rook moves...
     if(p.type === 'k') this.castling[p.color] = {k:false, q:false};
     if(p.type === 'r'){
       const row = p.color === 'w' ? 7 : 0;
       if(m.from[0] === row && m.from[1] === 0) this.castling[p.color].q = false;
       if(m.from[0] === row && m.from[1] === 7) this.castling[p.color].k = false;
     }
+    // ...or when an opponent rook on its starting square is captured.
+    if(captured && captured.type === 'r'){
+      const enemy = captured.color;
+      const enemyHomeRow = enemy === 'w' ? 7 : 0;
+      if(m.to[0] === enemyHomeRow){
+        if(m.to[1] === 0) this.castling[enemy].q = false;
+        if(m.to[1] === 7) this.castling[enemy].k = false;
+      }
+    }
+    // Halfmove clock: reset on pawn move or capture, otherwise increment.
+    if(p.type === 'p' || m.capture) this.halfmove = 0;
+    else this.halfmove++;
+    if(p.color === 'b') this.fullmove++;
     // EP target
     this.ep = m.double ? [(m.from[0]+m.to[0])/2, m.from[1]] : null;
     this.turn = this.opp(this.turn);
@@ -200,4 +217,5 @@ class Chess {
   isCheckmate(){ return this.legalMoves().length === 0 && this.isInCheck(this.turn); }
   isStalemate(){ return this.legalMoves().length === 0 && !this.isInCheck(this.turn); }
 }
-window.Chess = Chess;
+if (typeof window !== 'undefined') window.Chess = Chess;
+if (typeof module !== 'undefined' && module.exports) module.exports = Chess;
